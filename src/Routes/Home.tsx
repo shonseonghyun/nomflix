@@ -68,8 +68,35 @@ const Box = styled(motion.div)<IBgPhotoProps>`
     flex-direction: column;
     justify-content: end;
     align-items: center;
-    
+    &:first-child{
+        transform-origin:0% 100%;
+    }
+    &:last-child{
+        transform-origin:100% 100%;
+    }
 `;
+const Info = styled(motion.div)`
+    width:100%;
+    padding: 10px;
+    background-color: ${props=>props.theme.black.lighter};
+    opacity: 0;
+    position: absolute;
+    bottom: 0;
+    h4{
+        text-align: center;
+        font-size: 15px;
+    }
+`;
+
+const infoVariants = {
+    hover:{
+        opacity:1,
+        transition:{
+            delay:0.5,
+            type:"tween"
+        }
+    }
+}
 
 // const rowVariants = {
 //     hidden:{
@@ -83,6 +110,20 @@ const Box = styled(motion.div)<IBgPhotoProps>`
 //         x: -window.outerWidth +(window.outerWidth/5)
 //     }
 // }
+
+const boxVariants ={
+    normal : {
+        scale: 1
+    } ,
+    hover:{
+        scale:1.2,
+        y:-30,
+        transition:{
+            delay:0.5,
+            type:"tween"
+        }
+    }
+}
 
 const Home = () => {
     const width =  useWindowDimensions();
@@ -144,10 +185,18 @@ const Home = () => {
                                 {
                                     data?.results.slice(1).slice(offset*page, offset*page+offset).map((movie)=>(
                                         <Box 
+                                            variants={boxVariants}
+                                            initial="normal"
+                                            whileHover="hover"
+                                            // whileHover={{scale:1.3}}
+                                            // initial={{scale:1}}
+                                            transition={{type:'tween'}}
                                             key={movie.id}
-                                            bgPhoto = {makeImagePath(movie.backdrop_path)}
+                                            bgPhoto={makeImagePath(movie.backdrop_path)}
                                         >
-                                            {movie.title}
+                                            <Info variants={infoVariants}>
+                                                <h4>{movie.title}</h4>
+                                            </Info>
                                         </Box>
                                     ))
                                 }
