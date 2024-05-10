@@ -19,7 +19,8 @@ const GlobalStyle = createGlobalStyle`
     body{
         font-weight: 300;
         font-family: 'Source Sans Pro', sans-serif;
-        color:black;
+        color:${props=>props.theme.white.darker};
+        background-color: black;
         line-height: 1.2;
     }
     ol, ul{
