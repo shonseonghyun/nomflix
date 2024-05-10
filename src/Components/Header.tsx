@@ -119,7 +119,6 @@ const Header = () => {
 
     useEffect(()=>{
         scrollY.on("change",()=>{
-            console.log(scrollY.get());
             if(scrollY.get()>80){
                 navAnimation.start("scroll");
             }else{
