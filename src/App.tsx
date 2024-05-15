@@ -4,6 +4,7 @@ import Home from './Routes/Home';
 import Search from './Routes/Search';
 import Tv from './Routes/Tv';
 import Header from './Components/Header';
+import Footer from './Components/Footer';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="movie/:movieId" />
         </Route>
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

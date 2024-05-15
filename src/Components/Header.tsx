@@ -1,7 +1,12 @@
 import { AnimatePresence, motion, useAnimation, useScroll, useTransform } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { Link, useMatch } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Link, useMatch, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+interface IForm{
+    keyword:string
+}
 
 const Nav = styled(motion.nav)`
     display: flex;
@@ -14,6 +19,7 @@ const Nav = styled(motion.nav)`
     font-size: 14px;
     padding: 20px 60px;
     color: white;
+    z-index: 99;
 `;
 
 const Col = styled(motion.div)`
@@ -32,7 +38,7 @@ const Logo = styled(motion.svg)`
     }
 `;
 
-const Search = styled.span`
+const Search = styled.form`
   color: white;
   display: flex;
   align-items: center;
@@ -116,6 +122,8 @@ const Header = () => {
     const tvMatch = useMatch("tv");
     const inputAnimation = useAnimation();
     const navAnimation = useAnimation();
+    const {register,handleSubmit} = useForm<IForm>();
+    const navigate = useNavigate();
 
     useEffect(()=>{
         scrollY.on("change",()=>{
@@ -139,6 +147,10 @@ const Header = () => {
         }
         setIsClicked((prev)=>!prev)
     };
+
+    const onValid = (data:IForm)=>{
+        navigate(`search?keyword=${data.keyword}`)
+    }
 
     return (
         <Nav animate={navAnimation} variants ={navVariants} initial={"top"} >
@@ -174,7 +186,7 @@ const Header = () => {
 
             <Col>
                     {/* {clicked? <Input type="text" initial={{width:"0px", left:0}} animate={{width:"100px",left:20}}/> : null} */}
-                    <Search >
+                    <Search onSubmit={handleSubmit(onValid)}>
                         <motion.svg
                             onClick={toggleSearch}
                             animate={{x:isClicked ? -200 : 0}}
@@ -194,6 +206,7 @@ const Header = () => {
                             {clicked? <Input type='text' placeholder='Search for movie or tv shows' initial={{width:"0px"}} animate={{width:"100px"}} exit={{width:"0px"}}/>: null}
                         </AnimatePresence> */}
                         <Input 
+                            {...register("keyword")}
                             type='text' 
                             placeholder='Search for movie or tv shows' 
                             animate={inputAnimation} 
