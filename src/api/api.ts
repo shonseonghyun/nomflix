@@ -10,7 +10,8 @@ interface IMovie{
     backdrop_path:string,
     poster_path:string,
     title:string,
-    overview:string
+    overview:string,
+    name:string
 }
 
 export interface IGetMovieResult{
@@ -38,5 +39,17 @@ export const getPopularMovies = async ()=>{
 export const getUpcomingMovies = async ()=>{
     return await API.get(`/movie/upcoming?api_key=${API_KEY}`)
         .then(response=>response.data)
+    ;
+}
+
+export const searchMovie = async (param:string)=>{
+    return await API.get(`/search/movie?api_key=${API_KEY}&language=en-US&query=${param}`)
+    .then(response=>response.data)
+;
+}
+
+export const searchSeries = async (param:string)=>{
+    return await API.get(`/search/tv?api_key=${API_KEY}&language=en-US&query=${param}`)
+    .then(response=>response.data)
     ;
 }

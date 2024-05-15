@@ -120,6 +120,7 @@ const Header = () => {
     const {scrollY} = useScroll();
     const homeMatch = useMatch("");
     const tvMatch = useMatch("tv");
+    const searchMatch = useMatch("search");
     const inputAnimation = useAnimation();
     const navAnimation = useAnimation();
     const {register,handleSubmit} = useForm<IForm>();
@@ -179,6 +180,12 @@ const Header = () => {
                         <Item>
                             Tv Shows 
                             {tvMatch? <Circle layoutId='where'/> : null}
+                        </Item>
+                    </Link>
+                    <Link to="/search">
+                        <Item>
+                            Search 
+                            {searchMatch? <Circle layoutId='where'/> : null}
                         </Item>
                     </Link>
                 </Items>
