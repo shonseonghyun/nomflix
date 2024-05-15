@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
-import { IGetMovieResult, getMovies } from '../api/api';
+import { IGetMovieResult, getNowPlayingMovies, getPopularMovies, getUpcomingMovies } from '../api/api';
 import styled from 'styled-components';
 import { makeImagePath } from '../utils';
 import { AnimatePresence, motion, useScroll } from 'framer-motion';
@@ -8,19 +8,16 @@ import useWindowDimensions from '../useWindowDimensions';
 import { useMatch, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight, faCircleInfo, faPen, faPlay, faSmile, fas } from '@fortawesome/free-solid-svg-icons';
+import Slider from '../Components/Slider';
 
-interface IBgPhotoProps{
+export interface IBgPhotoProps{
     bgPhoto:string,
-}
-
-interface IRowProps{
-    page:number
 }
 
 const Wrapper = styled.div`
     background: black;
     overflow-x: hidden;
-    /* overflow-y: hidden; */
+    overflow-y: hidden;
     /* background-color: yellow; */
 `;
 
@@ -92,103 +89,9 @@ const BtnText =styled.p`
     font-size:15px;
 `;
 
-const Slider = styled.div`
-    position: relative;
-    margin-left: 30px;
-    /* top: -500px;  */
-    margin-bottom: 80px;
-    height: 200px;
-`;
-
-const LeftArrow = styled(motion.div)`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    top:0px;
-    background-color: rgba(0,0,0,0.5);
-    left: 0px;
-    width: 20px;
-    height: 200px;
-    position: absolute;
-`;
-
-const RightArrow = styled(motion.div)`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    top:0px;
-    background-color: rgba(0,0,0,0.5);
-    right: 0px;
-    width: 20px;
-    height: 200px;
-    position: absolute;
-`;
-const RowName = styled.h1`
-    position: absolute;
-    top:-30px;
-    width   :100% ;
-    height: 200px;
-    font-size: 20px;
-`;
-
-const Row = styled(motion.div)<IRowProps>`
-    position: absolute;
-    display: grid;
-    gap: 10px;
-    grid-template-columns: repeat(6, 1fr);
-    width: 100%;
-    /* &:hover >  ${LeftArrow},${RightArrow}{
-        opacity: 1;
-    } */
-    & > .hover_arrow{
-            opacity: 0;
-            cursor: pointer;
-    }
-    &:hover > .hover_arrow{
-            opacity: 1;
-            transition: opacity 0.2s ease-in-out;
-    }
-    /* & >  .hover_arrow:{
-        background-color: yellow;
-    } */
-`;
-
-const Box = styled(motion.div)<IBgPhotoProps>`
-    background-color: white;
-    height: 200px;
-    border-radius: 10px;
-    color:white;
-    font-size: 20px;
-    background-image: url(${(props)=>props.bgPhoto});
-    background-size: cover;
-    background-position: center center;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-    align-items: center;
-    cursor: pointer;
-    &:first-child{
-        transform-origin:0% 100%;
-    }
-    &:last-child{
-        transform-origin:100% 100%;
-    }
-`;
-const Info = styled(motion.div)`
-    width:100%;
-    padding: 10px;
-    background-color: ${props=>props.theme.black.lighter};
-    opacity: 0;
-    position: absolute;
-    bottom: 0;
-    h4{
-        text-align: center;
-        font-size: 15px;
-    }
-`;
 
 const Overlay = styled(motion.div)`
-    position: absolute;
+    position: fixed;
     opacity: 0;
     top:0;
     left:0;
@@ -232,68 +135,33 @@ const BigOverview =styled.p`
     color:${(props)=>props.theme.white.lighter};
 `;
 
-const infoVariants = {
-    hover:{
-        opacity:1,
-        transition:{
-            delay:0.5,
-            type:"tween"
-        }
-    }
-}
-
-const boxVariants ={
-    normal : {
-        scale: 1
-    } ,
-    hover:{
-        scale:1.2,
-        y:-30,
-        transition:{
-            delay:0.5,
-            type:"tween"
-        }
-    }
-}
-
-
 const Home = () => {
-    const offset = 6;
-    const bigMovieMatch = useMatch("movie/:movieId");
-    const width =  useWindowDimensions();
+    const bigMovieMatch = useMatch("movie/:category/:movieId");
     const navigate = useNavigate();
-    const {data,isLoading} = useQuery<IGetMovieResult>(["movies","nowPlaying"],getMovies,{refetchOnWindowFocus:false});
-    const [page,setPage] = useState(0);
-    const [leaving,setLeaving] = useState(false);
-    const [back,setBack] = useState(false);
+    const {data:nowPlaying,isLoading:nowPlayingLoading} = useQuery<IGetMovieResult>(["NowPlaing","nowPlaying"],getNowPlayingMovies,{refetchOnWindowFocus:false});
+    const {data:popluar,isLoading:popularLoading} = useQuery<IGetMovieResult>(["Popular","popular"],getPopularMovies,{refetchOnWindowFocus:false});
+    const {data:upcoming,isLoading:upcomingLoading} = useQuery<IGetMovieResult>(["upcoming","upcoming"],getUpcomingMovies,{refetchOnWindowFocus:false});
     const {scrollY}= useScroll();
-    //click한 movie 상세 정보
-    const clickedMovie = bigMovieMatch?.params.movieId && data?.results.find(movie => String(movie.id) === bigMovieMatch.params.movieId)
+
+    const newClicked = ()=>{
+        if(bigMovieMatch?.params.movieId && bigMovieMatch.params.category){
+            const category = bigMovieMatch.params.category;
+            if(category ==="nowplaying"){
+                return nowPlaying?.results.find(movie => String(movie.id) === bigMovieMatch.params.movieId)
+            }
+            else if(category==="popular"){
+                return popluar?.results.find(movie => String(movie.id) === bigMovieMatch.params.movieId)
+            }
+            else{
+                return upcoming?.results.find(movie => String(movie.id) === bigMovieMatch.params.movieId)
+            }
+        }
+    }
+    const clickedMovie = newClicked();
+    console.log(clickedMovie);
     
-    const increaseIndex = ()=>{
-        if(data){
-            if(leaving) return;
-            setLeaving(true);
-            setBack(false);
-            const totalMovies = data?.results.length-1;
-            const maxIndex = Math.ceil(totalMovies / offset) -1;
-            setPage((prev)=>prev === maxIndex ? 0 : prev+1);
-        }
-    };
-
-    const decreaseIndex = ()=>{
-        if(data){
-            if(leaving) return;
-            setLeaving(true);
-            setBack(true);
-            const totalMovies = data?.results.length-1;
-            const maxIndex = Math.ceil(totalMovies / offset) -1;
-            setPage((prev)=>prev === 0 ? maxIndex : prev-1);
-        }
-    };
-
     const onBokxClicked = (movieId:number)=>{
-        navigate(`/movie/${movieId}`);
+        navigate(`/movie/nowplaying/${movieId}`);
     }
 
     const onOverlayClicked = ()=>{
@@ -303,7 +171,7 @@ const Home = () => {
     return (
         <Wrapper>
             {
-                isLoading 
+                nowPlayingLoading 
                 ? 
                 <Loader>
                     Loading...
@@ -311,10 +179,10 @@ const Home = () => {
                 :
                 <>
                     <Banner 
-                        bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")}
+                        bgPhoto={makeImagePath(nowPlaying?.results[0].backdrop_path || "")}
                     >
-                        <Title>{data?.results[0].title}</Title>
-                        <Overview>{data?.results[0].overview}</Overview>
+                        <Title>{nowPlaying?.results[0].title}</Title>
+                        <Overview>{nowPlaying?.results[0].overview}</Overview>
                         <BtnWrapper>
                             <PlayBtn>
                                 <FontAwesomeIcon icon={faPlay} />
@@ -322,164 +190,21 @@ const Home = () => {
                             </PlayBtn>
                             <InfoBtn>
                                 <FontAwesomeIcon icon={faCircleInfo} />
-                                <BtnText onClick={()=>onBokxClicked(data?.results[0].id || 0)}>information</BtnText>
+                                <BtnText onClick={()=>onBokxClicked(nowPlaying?.results[0].id || 0)}>information</BtnText>
                             </InfoBtn>
                         </BtnWrapper>
                     </Banner>
 
-                    <Slider>
-                        <RowName>Now Playing</RowName>
-                        <AnimatePresence 
-                            custom={back}
-                            initial={false} //slider 제자리 유지, AnimatePresence는 컴포넌트가 처음 렌더링될 때 자식의 초기 애니메이션을 비활성화합니다.
-                            onExitComplete={()=>setLeaving(false)} //exit 중인 모든 노드들이 애니메이션을 끝내면 실행됩니다.
-                         > 
-                            <Row 
-                                page={page}
-                                className='row'
-                                key={page} 
-                                custom={back}
-                                initial={{ x: back? -width-10  : width + 10 }}
-                                animate={{ x: 0 }}
-                                exit={{ x: back? width+10: -width-10 }}
-                                transition={{type:"tween",duration:1}}
-                            >
-                                {
-                                    data?.results.slice(1).slice(offset*page, offset*page+offset).map((movie)=>(
-                                        <Box 
-                                            layoutId={movie.id+""}
-                                            variants={boxVariants}
-                                            initial="normal"
-                                            whileHover="hover"
-                                            // whileHover={{scale:1.3}}
-                                            // initial={{scale:1}}
-                                            transition={{type:'tween'}}
-                                            key={movie.id}
-                                            bgPhoto={makeImagePath(movie.backdrop_path)}
-                                            onClick={()=>onBokxClicked(movie.id)}
-                                        >
-                                            <Info variants={infoVariants}>
-                                                <h4>{movie.title}</h4>
-                                            </Info>
-                                        </Box>
-                                    ))
-                                }
-                                <>
-                                    <LeftArrow className='hover_arrow' onClick={decreaseIndex}>
-                                        <FontAwesomeIcon icon={faArrowLeft} />
-                                    </LeftArrow>    
-                                    <RightArrow className='hover_arrow' onClick={increaseIndex}>
-                                        <FontAwesomeIcon icon={faArrowRight} />
-                                    </RightArrow>    
-                                </>
-                            </Row>
-                        </AnimatePresence>
-                    </Slider>
-
-                    <Slider>
-                        <RowName>Best Playing</RowName>
-                        <AnimatePresence 
-                            custom={back}
-                            initial={false} //slider 제자리 유지, AnimatePresence는 컴포넌트가 처음 렌더링될 때 자식의 초기 애니메이션을 비활성화합니다.
-                            onExitComplete={()=>setLeaving(false)} //exit 중인 모든 노드들이 애니메이션을 끝내면 실행됩니다.
-                         >
-                            <Row 
-                                page={page}
-                                className='row'
-                                key={page} 
-                                custom={back}
-                                initial={{ x: back? -width-10  : width + 10 }}
-                                animate={{ x: 0 }}
-                                exit={{ x: back? width+10: -width-10 }}
-                                transition={{type:"tween",duration:1}}
-                            >
-                                {
-                                    data?.results.slice(1).slice(offset*page, offset*page+offset).map((movie)=>(
-                                        <Box 
-                                            layoutId={movie.id+""}
-                                            variants={boxVariants}
-                                            initial="normal"
-                                            whileHover="hover"
-                                            // whileHover={{scale:1.3}}
-                                            // initial={{scale:1}}
-                                            transition={{type:'tween'}}
-                                            key={movie.id}
-                                            bgPhoto={makeImagePath(movie.backdrop_path)}
-                                            onClick={()=>onBokxClicked(movie.id)}
-                                        >
-                                            <Info variants={infoVariants}>
-                                                <h4>{movie.title}</h4>
-                                            </Info>
-                                        </Box>
-                                    ))
-                                }
-                                <>
-                                    <LeftArrow className='hover_arrow' onClick={decreaseIndex}>
-                                        <FontAwesomeIcon icon={faArrowLeft} />
-                                    </LeftArrow>    
-                                    <RightArrow className='hover_arrow' onClick={increaseIndex}>
-                                        <FontAwesomeIcon icon={faArrowRight} />
-                                    </RightArrow>    
-                                </>
-                            </Row>
-                        </AnimatePresence>
-                    </Slider>
-
-                    <Slider>
-                        <RowName>comming Soon</RowName>
-                        <AnimatePresence 
-                            custom={back}
-                            initial={false} //slider 제자리 유지, AnimatePresence는 컴포넌트가 처음 렌더링될 때 자식의 초기 애니메이션을 비활성화합니다.
-                            onExitComplete={()=>setLeaving(false)} //exit 중인 모든 노드들이 애니메이션을 끝내면 실행됩니다.
-                         >
-                            <Row 
-                                page={page}
-                                className='row'
-                                key={page} 
-                                custom={back}
-                                initial={{ x: back? -width-10  : width + 10 }}
-                                animate={{ x: 0 }}
-                                exit={{ x: back? width+10: -width-10 }}
-                                transition={{type:"tween",duration:1}}
-                            >
-                                {
-                                    data?.results.slice(1).slice(offset*page, offset*page+offset).map((movie)=>(
-                                        <Box 
-                                            layoutId={movie.id+""}
-                                            variants={boxVariants}
-                                            initial="normal"
-                                            whileHover="hover"
-                                            // whileHover={{scale:1.3}}
-                                            // initial={{scale:1}}
-                                            transition={{type:'tween'}}
-                                            key={movie.id}
-                                            bgPhoto={makeImagePath(movie.backdrop_path)}
-                                            onClick={()=>onBokxClicked(movie.id)}
-                                        >
-                                            <Info variants={infoVariants}>
-                                                <h4>{movie.title}</h4>
-                                            </Info>
-                                        </Box>
-                                    ))
-                                }
-                                <>
-                                    <LeftArrow className='hover_arrow' onClick={decreaseIndex}>
-                                        <FontAwesomeIcon icon={faArrowLeft} />
-                                    </LeftArrow>    
-                                    <RightArrow className='hover_arrow' onClick={increaseIndex}>
-                                        <FontAwesomeIcon icon={faArrowRight} />
-                                    </RightArrow>    
-                                </>
-                            </Row>
-                        </AnimatePresence>
-                    </Slider>
+                    <Slider movies={nowPlaying as IGetMovieResult} rowText='Now Playing'></Slider>
+                    <Slider movies={popluar as IGetMovieResult} rowText='Popular'></Slider>
+                    <Slider movies={upcoming as IGetMovieResult} rowText='Upcoming'></Slider>
 
                     <AnimatePresence>
                     {
                         bigMovieMatch ? 
                         <>
                             <Overlay onClick={onOverlayClicked} animate={{opacity:1}} exit={{opacity:0}}/>
-                            <BigMovie layoutId={bigMovieMatch?.params.movieId} style={{top:scrollY.get()+100,left:0,right:90}}>
+                            <BigMovie layoutId={bigMovieMatch?.params.category+"/"+bigMovieMatch?.params.movieId} style={{top:scrollY.get()+100,left:0,right:90}}>
                                 {
                                     clickedMovie &&
                                     <>
@@ -496,7 +221,6 @@ const Home = () => {
                         :null
                     }
                     </AnimatePresence>
-
                 </>
             }
         </Wrapper>        

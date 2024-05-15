@@ -24,8 +24,19 @@ export interface IGetMovieResult{
     total_results:number
 }
 
- export const getMovies = async ()=>{
+export const getNowPlayingMovies = async ()=>{
     return await API.get(`/movie/now_playing?api_key=${API_KEY}`)
+        .then(response=>response.data)
+    ;
+}
+
+export const getPopularMovies = async ()=>{
+    return await API.get(`/movie/popular?api_key=${API_KEY}`)
+        .then(response=>response.data)
+    ;
+}
+export const getUpcomingMovies = async ()=>{
+    return await API.get(`/movie/upcoming?api_key=${API_KEY}`)
         .then(response=>response.data)
     ;
 }

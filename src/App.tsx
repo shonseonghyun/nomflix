@@ -14,7 +14,7 @@ function App() {
         <Route path='/search' element={<Search />}/>
         <Route path='/tv' element={<Tv />}/>
         <Route path='/' element={<Home />}>
-          <Route path="movie/:movieId" />
+          <Route path="movie/:category/:movieId" />
         </Route>
       </Routes>
       <Footer />
