@@ -187,12 +187,14 @@ const Search = () => {
             <SearchingWrapper>
                 {
                     keyword ?
+                    <>
                     <CommonText>
                         Result of searching with&nbsp;
-                        <h1 style={{display:"inline-block"}}>
+                    </CommonText>
+                        <h1 style={{display:"inline-block", fontSize:"20px"}}>
                             {keyword}
                         </h1>
-                    </CommonText>
+                    </>
                     : <CommonText>
                         No search results found.
                         Click the magnifying glass icon in the upper right to search!

@@ -11,11 +11,11 @@ function App() {
       <Header></Header>
       <Routes>
         <Route path='/search' element={<Search />}>
-          <Route path=':category/:Id'/>
+          <Route path=':category/:Id' element={<Search />}/>
         </Route>
         <Route path='/tv' element={<Tv />}/>
         <Route path='/' element={<Home />}>
-          <Route path="movie/:category/:movieId" />
+          <Route path="movie/:category/:movieId" element={<Home />} />
         </Route>
       </Routes>
       <Footer />
