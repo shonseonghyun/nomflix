@@ -1,13 +1,13 @@
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { IBgPhotoProps } from '../Routes/Home';
-import { useState } from 'react';
+import { IGetMovieResult } from '../api/api';
 import useWindowDimensions from '../useWindowDimensions';
 import { makeImagePath } from '../utils';
-import { useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { IGetMovieResult } from '../api/api';
 
 const Wrapper = styled.div`
 position: relative;

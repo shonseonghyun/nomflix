@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
-import { IGetMovieResult, getNowPlayingMovies, getPopularMovies, getUpcomingMovies } from '../api/api';
-import styled from 'styled-components';
-import { makeImagePath } from '../utils';
-import { AnimatePresence, motion, useScroll } from 'framer-motion';
-import useWindowDimensions from '../useWindowDimensions';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { faCircleInfo, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faArrowRight, faCircleInfo, faPen, faPlay, faSmile, fas } from '@fortawesome/free-solid-svg-icons';
+import { AnimatePresence, motion, useScroll } from 'framer-motion';
+import { useQuery } from 'react-query';
+import { useMatch, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import Slider from '../Components/Slider';
+import { IGetMovieResult, getNowPlayingMovies, getPopularMovies, getUpcomingMovies } from '../api/api';
+import { makeImagePath } from '../utils';
 
 export interface IBgPhotoProps{
     bgPhoto:string,

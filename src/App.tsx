@@ -1,10 +1,9 @@
-import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Footer from './Components/Footer';
+import Header from './Components/Header';
 import Home from './Routes/Home';
 import Search from './Routes/Search';
 import Tv from './Routes/Tv';
-import Header from './Components/Header';
-import Footer from './Components/Footer';
 
 function App() {
   return (

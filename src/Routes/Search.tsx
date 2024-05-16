@@ -1,9 +1,9 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { useQuery } from 'react-query';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
-import { IGetMovieResult, searchMovie, searchSeries } from '../api/api';
 import styled from 'styled-components';
+import { IGetMovieResult, searchMovie, searchSeries } from '../api/api';
 import { makeImagePath } from '../utils';
-import { AnimatePresence, motion } from 'framer-motion';
 
 const Wrapper= styled.div`
     margin-top: 80px;
