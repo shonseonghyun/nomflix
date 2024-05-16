@@ -134,6 +134,7 @@ const BigOverview =styled.p`
 `;
 
 const Home = () => {
+    console.log("Home 랜더링");
     const bigMovieMatch = useMatch("movie/:category/:movieId");
     const navigate = useNavigate();
     const {data:nowPlaying,isLoading:nowPlayingLoading} = useQuery<IGetMovieResult>(["NowPlaing","nowPlaying"],getNowPlayingMovies,{refetchOnWindowFocus:false});

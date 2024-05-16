@@ -1,7 +1,7 @@
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { IBgPhotoProps } from '../Routes/Home';
@@ -141,6 +141,8 @@ interface ISliderProps{
 
 
 const Slider = ({movies,rowText}:ISliderProps) => {
+    console.log("Slider 랜더링");
+ 
     const rowName = rowText.toLowerCase().replaceAll(" ","");
     const offset = 6;
     const navigate = useNavigate();
@@ -149,7 +151,7 @@ const Slider = ({movies,rowText}:ISliderProps) => {
     const [leaving,setLeaving] = useState(false);
     const [back,setBack] = useState(false);
 
-    const increaseIndex = ()=>{
+    const increaseIndex = useCallback(()=>{
         if(movies){
             if(leaving) return;
             setLeaving(true);
@@ -158,9 +160,9 @@ const Slider = ({movies,rowText}:ISliderProps) => {
             const maxIndex = Math.ceil(totalMovies / offset) -1;
             setPage((prev)=>prev === maxIndex ? 0 : prev+1);
         }
-    };
-
-    const decreaseIndex = ()=>{
+    },[]);
+    
+    const decreaseIndex = useCallback(()=>{
         if(movies){
             if(leaving) return;
             setLeaving(true);
@@ -169,8 +171,8 @@ const Slider = ({movies,rowText}:ISliderProps) => {
             const maxIndex = Math.ceil(totalMovies / offset) -1;
             setPage((prev)=>prev === 0 ? maxIndex : prev-1);
         }
-    };
-
+    },[]);
+ 
     const onBokxClicked = (movieId:number)=>{
         navigate(`/movie/${rowName}/${movieId}`);
     }
