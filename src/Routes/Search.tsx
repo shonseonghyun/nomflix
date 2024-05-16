@@ -1,17 +1,16 @@
-import React from 'react';
 import { useQuery } from 'react-query';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { IGetMovieResult, searchMovie, searchSeries } from '../api/api';
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTv, faVideo } from '@fortawesome/free-solid-svg-icons';
 import { makeImagePath } from '../utils';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const Wrapper= styled.div`
     margin-top: 80px;
     margin-left: 30px;
     margin-right: 30px;
+    margin-bottom: 80px;
+    height: 100%;
 `;
 
 const SearchingWrapper =styled.div`
@@ -55,6 +54,10 @@ const Movie = styled(motion.div)<{bgPhoto:string}>`
     flex-direction: column;
     justify-content: end;
     align-items: center;
+    border-style: solid;
+    border-width:1px;
+    border-color: #ac8888;
+
     &:nth-child(6n+1){
         transform-origin:0% 100%;
     }
@@ -85,6 +88,44 @@ const Loader = styled.div`
   align-items: center;
 `;
 
+const BigArea= styled(motion.div)`
+    position: fixed;
+    z-index: 99;
+    top: 100px;
+    left: 0px;
+    right: 0px;
+    margin: 0 auto;
+    width: 50vw;
+    height: 70vh;
+    background-color: ${(props)=>props.theme.black.lighter};
+`;
+
+const Overlay = styled(motion.div)`
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: 1;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+`;
+
+const BigCover = styled.div<{bgPhoto:string}>`
+    /* position: absolute; */
+    width: 100%;
+    height: 55%;
+    background-image: url(${props=>props.bgPhoto});
+    background-size: cover;
+    background-position: center center;
+`;
+
+const BigTitle = styled.div`
+    color:${(props)=>props.theme.white.lighter};
+    font-size: 20px;
+    top:-60px;
+    padding:20px;
+`;
+ 
 const movieVariants = {
     normal:{
         scale:1
@@ -104,16 +145,43 @@ const titleoverlayVariants = {
         opacity:0
     },
     hover:{
-        opacity:1
+        opacity:1,
+        transition:{
+            delay: 0.5
+        }
     }
 }
 
 const Search = () => {
+    const bigSearchMatch = useMatch("search/:category/:id");
+    const navigate = useNavigate();
     const location= useLocation();
     const keyword = new URLSearchParams(location.search).get("keyword") || "";
     const {data:movies,isLoading:moviesLoading} = useQuery<IGetMovieResult>(["movies",keyword],()=>searchMovie(keyword));
     const {data:series,isLoading:seriesLoading} = useQuery<IGetMovieResult>(["series",keyword],()=>searchSeries(keyword));
     
+    const clickedItem = ()=>{
+        if(bigSearchMatch?.params.id && bigSearchMatch.params.category){
+            const category = bigSearchMatch.params.category;
+            if(category ==="movie"){
+                return movies?.results.find(movie => String(movie.id) === bigSearchMatch.params.id)
+            }
+            else if(category==="tv"){
+                return series?.results.find(series => String(series.id) === bigSearchMatch.params.id)
+            }
+        }
+    }
+
+    const clickedSearchItem = clickedItem();    
+    
+    const onBoxClicked = (category:string, boxId:number)=>{
+        navigate(`${category}/${boxId}?keyword=${keyword}`);
+    }
+
+    const onOverlayClicked=()=>{
+        navigate(`/search?keyword=${keyword}`);
+    }
+
     return (
         <Wrapper>
             <SearchingWrapper>
@@ -148,11 +216,13 @@ const Search = () => {
                         <>
                             {movies?.results.map(movie=>(
                                 <Movie 
+                                    layoutId={movie.id+""}
                                     key={movie.id} 
                                     variants={movieVariants} 
                                     initial="normal" 
                                     whileHover="hover" 
                                     bgPhoto={movie.backdrop_path ? makeImagePath(movie.backdrop_path,"w500") : "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FzaHVf%2FbtsCUzDyFK6%2FzLwkbqViX9RYEST5DwRJmK%2Fimg.png" }
+                                    onClick={()=>onBoxClicked("movie",movie.id)}
                                 >
                                     <TitleOverlay variants={titleoverlayVariants}>
                                         {movie.title}    
@@ -167,7 +237,7 @@ const Search = () => {
 
             <SearchedWrapper>
                 <Title>
-                    <FontAwesomeIcon style={{marginRight:"5px"}} icon={faTv} />
+                    📺
                     Series
                 </Title>
                 <Grid>
@@ -181,11 +251,13 @@ const Search = () => {
                         <>
                             {series?.results.map(series=>(
                                 <Movie 
+                                    layoutId={series.id+""}
                                     key={series.id} 
                                     variants={movieVariants} 
                                     initial="normal" 
                                     whileHover="hover" 
                                     bgPhoto={series.backdrop_path ? makeImagePath(series.backdrop_path,"w500") : "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FzaHVf%2FbtsCUzDyFK6%2FzLwkbqViX9RYEST5DwRJmK%2Fimg.png" }
+                                    onClick={()=>onBoxClicked("tv",series.id)}
                                 >
                                     <TitleOverlay variants={titleoverlayVariants}>
                                         {series.name}    
@@ -197,6 +269,31 @@ const Search = () => {
                     }
                 </Grid>
             </SearchedWrapper>
+            
+            <AnimatePresence>
+            {
+                bigSearchMatch ?
+                <>
+                    <BigArea layoutId={bigSearchMatch.params.id}>
+                        {
+                            clickedSearchItem && 
+                            <>
+                                <BigCover 
+                                    bgPhoto={clickedSearchItem.backdrop_path ? makeImagePath(clickedSearchItem.backdrop_path,"w500") : "https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FzaHVf%2FbtsCUzDyFK6%2FzLwkbqViX9RYEST5DwRJmK%2Fimg.png" }
+                                />
+                                <BigTitle>
+                                    {clickedSearchItem.title ? clickedSearchItem.title :clickedSearchItem.name }
+                                </BigTitle>
+                            </>
+                        }
+                    </BigArea>
+                    
+                    <Overlay onClick={onOverlayClicked}/>
+                </>
+                :
+                null
+            }
+            </AnimatePresence>
         </Wrapper>
     );
 };
